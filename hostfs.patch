@@ -1,0 +1,27 @@
+--- a/lib/python3.7/site-packages/thonny/misc_utils.py	2021-02-17 13:52:58.000000000 +0000
++++ b/lib/python3.7/site-packages/thonny/misc_utils.py	2021-02-21 17:57:22.092559493 +0000
+@@ -79,7 +79,12 @@
+         # 'posix' means we're on Linux or OSX (Mac).
+         # Call the unix "mount" command to list the mounted volumes.
+         mount_output = subprocess.check_output("mount").splitlines()
+-        return [x.split()[2].decode("utf-8") for x in mount_output]
++        retval = [x.split()[2].decode("utf-8") for x in mount_output]
++        mount_return = []
++        for item in retval:
++            if not "hostfs" in item:
++                mount_return.append(item)
++        return mount_return
+ 
+ 
+ def get_win_volume_name(path: str) -> str:
+--- a/lib/python3.7/site-packages/thonny/plugins/micropython/uf2dialog.py	2021-02-17 14:52:58.000000000 +0100
++++ b/lib/python3.7/site-packages/thonny/plugins/micropython/uf2dialog.py	2021-02-21 19:11:42.838992963 +0100
+@@ -237,7 +237,7 @@
+     @classmethod
+     def find_device_board_id_and_model(cls, mount_path):
+         info_path = os.path.join(mount_path, "INFO_UF2.TXT")
+-        if not os.path.isfile(info_path):
++        if not os.path.isfile(info_path) or "hostfs" in mount_path:
+             return None
+ 
+         board_id = None

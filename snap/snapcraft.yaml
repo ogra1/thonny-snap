@@ -1,0 +1,61 @@
+name: thonny
+base: core20
+version: '3.3.4'
+summary: Python IDE for beginners
+description: |
+  Thonny is a Python IDE meant for learning programming.
+
+grade: stable
+confinement: strict
+compression: lzo
+
+architectures:
+  - build-on: amd64
+    run-on: amd64
+
+apps:
+  thonny:
+    command: bin/thonny
+    plugs:
+      - desktop
+      - home
+      - mount-observe
+      - network
+      - network-bind
+      - raw-usb
+      - removable-media
+      - x11
+
+parts:
+  thonny:
+    source: https://github.com/thonny/thonny/releases/download/v$SNAPCRAFT_PROJECT_VERSION/thonny-$SNAPCRAFT_PROJECT_VERSION-x86_64.tar.gz
+    plugin: dump
+    override-build: |
+      snapcraftctl build
+      # patch against odd snap behaviour exposing hostfs paths twice
+      cd $SNAPCRAFT_PART_INSTALL
+      patch -p1 <$SNAPCRAFT_PROJECT_DIR/hostfs.patch
+      # evil hack around some newer lib versions
+      cd $SNAPCRAFT_PART_INSTALL/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/
+      ln -sf libffi.so.7 libffi.so.6
+      ln -sf libgdbm.so.6 libgdbm.so.3
+      ln -sf libgdbm_compat.so.4 libgdbm_compat.so.3
+      cd $SNAPCRAFT_PART_INSTALL/lib/$SNAPCRAFT_ARCH_TRIPLET/
+      ln -sf libreadline.so.8 libreadline.so.6
+    stage-packages:
+      - libffi7
+      - libfreetype6
+      - libfontconfig1
+      - libgdbm6
+      - libgdbm-compat4
+      - libncursesw5
+      - libpng16-16
+      - libreadline8
+      - libtinfo5
+      - libx11-6
+      - libxau6
+      - libxcb1
+      - libxdmcp6
+      - libxft2
+      - libxrender1
+      - mount

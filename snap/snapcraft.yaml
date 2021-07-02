@@ -1,6 +1,6 @@
 name: thonny
 base: core20
-version: '3.3.4'
+adopt-info: thonny
 summary: Python IDE for beginners
 description: |
   Thonny is a Python IDE meant for learning programming.
@@ -28,8 +28,14 @@ apps:
 
 parts:
   thonny:
-    source: https://github.com/thonny/thonny/releases/download/v$SNAPCRAFT_PROJECT_VERSION/thonny-$SNAPCRAFT_PROJECT_VERSION-x86_64.tar.gz
+    source: https://github.com/thonny/thonny.git
     plugin: dump
+    override-pull: |
+      VER="$(git ls-remote --tags https://github.com/thonny/thonny.git | \
+           sed 's;^.*/v;;' | sort -t. -k 1,1n -k 2,2n -k 3,3n | tail -1)"
+      wget -q -O- https://github.com/thonny/thonny/releases/download/v${VER}/thonny-${VER}-x86_64.tar.gz |\
+           tar xzf - --strip-components=1 -C $SNAPCRAFT_PART_SRC
+      snapcraftctl set-version "${VER}"
     override-build: |
       snapcraftctl build
       # patch against odd snap behaviour exposing hostfs paths twice
